@@ -1,0 +1,6 @@
+composer.*
+vendor/
+bin/
+src/test.php
+src/config.php
+.DS_Store
