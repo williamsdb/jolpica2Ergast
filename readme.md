@@ -72,12 +72,27 @@ For years I have been happily using the Ergast database dumps containing all the
 Running the script is very straightforward:
 
 1. download the code/clone the repository
+2. rename config_dummy.php to config.php and change the settings in it to match you database
+
+```    // Database connection details
+    $host = "<hostname>"; // Replace with your database host
+    $username = "<username>"; // Replace with your database username
+    $password = "<password>"; // Replace with your database password
+    $database = "<database>"; // Replace with your database name
+    $port = 3306; // Replace with your database port
+```
+
+This has been tested with MySQL 8.0.40 but it should be fairly straigforward to get it working with other database engines.
+
+If you don't already have a copy of the Ergast based database already then you can download one from [here](https://github.com/williamsdb/jolpica2Ergast/tree/main/db_images)
+
 
 ### Prerequisites
 
 Requirements are very simple, it requires the following:
 
 1. PHP (I tested on v8.1.13)
+2. MySQL (I tested on v8.0.40)
 
 ### Installation
 
@@ -87,7 +102,6 @@ Requirements are very simple, it requires the following:
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- USAGE EXAMPLES -->
@@ -106,6 +120,24 @@ or
 
 ```./php index.php all```
 
+**Commands**
+
+| Command | Action                                                                                                                 |
+|---------|------------------------------------------------------------------------------------------------------------------------|
+| STATIC  | Update any static data such as the circuits, teams and drivers. You should only need to use this once or twice a year. |
+| RACE    | This updates the race data such as results, lap data and pit stops                                                     |
+| ALL     | Will run both STATIC and RACE.                                                                                         |
+
+**Rate limiting**
+
+Calls to the Jolpica API are rate limited as follows:
+
+| Limit     | Requests              |
+|-----------|-----------------------|
+| Burst     | 4 requests per second |
+| Sustained | 500 requests per hour |
+
+The code is written to make as few calls to the API as possible and also manage the rate limiting but the more you request the more likely it is that you will hit the limit. Try and avoid using ALL and spread your calls over a couple of hours. You could do this via cron.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -114,7 +146,7 @@ or
 <!-- ROADMAP -->
 ## Known Issues
 
-See the [open issues](https://github.com/williamsdb/jolpica2ergast/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/williamsdb/jolpica2Ergast/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

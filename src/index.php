@@ -43,10 +43,6 @@
     error_reporting(E_NOTICE);
     ini_set('display_errors', 0);
 
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-
     // have we got a config file?
     try {
         require __DIR__.'/config.php';
@@ -1386,58 +1382,5 @@
 
         return json_decode($response);
     }
-
-    function array_to_html($val, $var=FALSE) {
-    $do_nothing = true;
-    $indent_size = 20;
-    $out = '';
-    $colors = array(
-        "Teal",
-        "YellowGreen",
-        "Tomato",
-        "Navy",
-        "MidnightBlue",
-        "FireBrick",
-        "DarkGreen"
-        );
-  
-      // Get string structure
-      ob_start();
-      print_r($val);
-      $val = ob_get_contents();
-      ob_end_clean();
-  
-      // Color counter
-      $current = 0;
-  
-      // Split the string into character array
-      $array = preg_split('//', $val, -1, PREG_SPLIT_NO_EMPTY);
-      foreach($array as $char) {
-          if($char == "[")
-              if(!$do_nothing)
-                  if ($var) { $out .= "</div>"; }else{ echo "</div>"; }
-              else $do_nothing = false;
-          if($char == "[")
-              if ($var) { $out .= "<div>"; }else{ echo "<div>"; }
-          if($char == ")") {
-              if ($var) { $out .= "</div></div>"; }else{ echo "</div></div>"; }
-              $current--;
-          }
-  
-          if ($var) { $out .= $char; }else{ echo $char; }
-  
-          if($char == "(") {
-              if ($var){
-                $out .= "<div class='indent' style='padding-left: {$indent_size}px; color: ".($colors[$current % count($colors)]).";'>";
-              }else{
-                echo "<div class='indent' style='padding-left: {$indent_size}px; color: ".($colors[$current % count($colors)]).";'>";
-              }
-              $do_nothing = true;
-              $current++;
-          }
-      }
-
-      return $out;
-}
   
 ?>
