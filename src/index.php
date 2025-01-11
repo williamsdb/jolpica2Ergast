@@ -104,7 +104,7 @@
         $pdo = new PDO($dsn, $username, $password);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     } catch (PDOException $e) {
-        echo "Database error: " . $e->getMessage();
+        die("Database error: " . $e->getMessage().PHP_EOL);
     }
 
     // Update the static data (seasons, drivers, constructors, circuits, status)
@@ -166,7 +166,7 @@
         
             echo 'Season details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -231,7 +231,7 @@
         
             echo 'Driver details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -293,7 +293,7 @@
         
             echo 'Constructor details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -358,7 +358,7 @@
         
             echo 'Circuit details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -416,7 +416,7 @@
         
             echo 'Status details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
     }
@@ -429,8 +429,8 @@
         // * get the races details
         // ************************************************************
         try {
-        
-            echo 'Getting races details'. $line_ending;
+
+            echo 'Getting race details'. $line_ending;
         
             $page = 0;
             $total = 0;
@@ -442,6 +442,11 @@
         
                 // Cycle through the races and check if they are in the database already
                 foreach ($dets->MRData->RaceTable->Races as $race) {
+
+                    if (!isset($race->FirstPractice->time)){
+                        echo ' - Race round ' . $race->round . ' (' . $race->raceName . ') mising data so skipping'. $line_ending;
+                        continue;
+                    }
         
                     // SQL query to check if the record exists
                     $sql = "SELECT 1 FROM `races` WHERE `year` = :year AND `round` = :round";
@@ -507,7 +512,7 @@
         
             echo 'Races details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -652,7 +657,7 @@
         
             echo 'Sprint race details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -748,7 +753,7 @@
         
             echo 'Qualifying details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -922,7 +927,7 @@
         
             echo 'Race results complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -1028,7 +1033,7 @@
 
             echo 'Lap details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -1135,7 +1140,7 @@
 
             echo 'Pitstop details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
@@ -1232,15 +1237,15 @@
             }
             echo 'Constructor Standing details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
         // ************************************************************
-        // * get the drive standing details
+        // * get the driver standing details
         // ************************************************************
         try {
         
-            echo 'Getting drive standing details'. $line_ending;
+            echo 'Getting driver standing details'. $line_ending;
 
             // Prepare the SQL query
             $sql = 'SELECT `round` FROM `races` WHERE `year` = :year';
@@ -1329,7 +1334,7 @@
             }
             echo 'Driver Standing details complete'. $line_ending;
         } catch (PDOException $e) {
-            echo "Database error: " . $e->getMessage();
+            die("Database error: " . $e->getMessage().PHP_EOL);
         }
 
     }
@@ -1361,7 +1366,7 @@
         $i429 = 0;
 
         while ($httpCode != 200) {
-            // Get a page of season details to process
+            // Get a page of details to process
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
