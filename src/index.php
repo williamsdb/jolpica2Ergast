@@ -378,33 +378,36 @@
         
                 // Cycle through the statuses and check if they are in the database already
                 foreach ($dets->MRData->StatusTable->Status as $status) {
-        
-                    // SQL query to check if the record exists
-                    $sql = "SELECT 1 FROM `status` WHERE `status` = :status";
-                    $stmt = $pdo->prepare($sql);
-        
-                    // Bind parameters
-                    $stmt->bindParam(':status', $status->status, PDO::PARAM_STR);
-        
-                    // Execute the query
-                    $stmt->execute();
-        
-                    if ($stmt->rowCount() == 0) {
-        
-                        // SQL query to insert data
-                        $sql = "INSERT INTO `status` (`status`) VALUES (:status)";
-                        $stmt2 = $pdo->prepare($sql);
-        
-                        // Bind parameters to the query
-                        $stmt2->bindValue(':status', $status->status, PDO::PARAM_STR);
-        
+
+                    if (!empty($status->status)){
+                        // SQL query to check if the record exists
+                        $sql = "SELECT 1 FROM `status` WHERE `status` = :status";
+                        $stmt = $pdo->prepare($sql);
+            
+                        // Bind parameters
+                        $stmt->bindParam(':status', $status->status, PDO::PARAM_STR);
+            
                         // Execute the query
-                        if ($stmt2->execute()) {
-                            echo ' - '.$status->status . ' added to the database'. $line_ending;
-                        } else {
-                            echo "Error inserting record: " . implode(", ", $stmt2->errorInfo());
+                        $stmt->execute();
+            
+                        if ($stmt->rowCount() == 0) {
+            
+                            // SQL query to insert data
+                            $sql = "INSERT INTO `status` (`status`) VALUES (:status)";
+                            $stmt2 = $pdo->prepare($sql);
+            
+                            // Bind parameters to the query
+                            $stmt2->bindValue(':status', $status->status, PDO::PARAM_STR);
+            
+                            // Execute the query
+                            if ($stmt2->execute()) {
+                                echo ' - '.$status->status . ' added to the database'. $line_ending;
+                            } else {
+                                echo "Error inserting record: " . implode(", ", $stmt2->errorInfo());
+                            }
                         }
                     }
+        
                 }
         
                 $total = $dets->MRData->total;
@@ -444,7 +447,7 @@
                 foreach ($dets->MRData->RaceTable->Races as $race) {
 
                     if (!isset($race->FirstPractice->time)){
-                        echo ' - Race round ' . $race->round . ' (' . $race->raceName . ') mising data so skipping'. $line_ending;
+                        echo ' - Race round ' . $race->round . ' (' . $race->raceName . ') missing data so skipping'. $line_ending;
                         continue;
                     }
         
@@ -462,21 +465,26 @@
                     if ($stmt->rowCount() == 0) {
         
                         // SQL query to insert data
-                        $sql = "INSERT INTO races (`year`, `round`, `circuitId`, `name`, `date`, `time`, `url`, `fp1_date`, `fp1_time`, `fp2_date`, `fp2_time`, `fp3_date`, `fp3_time`, `quali_date`, `quali_time`)
+                        $sql = "INSERT INTO races (`year`, `round`, `circuitId`, `name`, `date`, `time`, `url`, `fp1_date`, `fp1_time`, `fp2_date`, `fp2_time`, `fp3_date`, `fp3_time`, `quali_date`, `quali_time`, `sprint_date`, `sprint_time`)
                                 VALUES (:year, :round, 
                                         (SELECT `circuitId` FROM `circuits` WHERE `circuitRef` = :circuitId), 
                                         :name, :date, :time, :url, 
                                         :fp1_date, :fp1_time, :fp2_date, :fp2_time, 
-                                        :fp3_date, :fp3_time, :quali_date, :quali_time)";
+                                        :fp3_date, :fp3_time, :quali_date, :quali_time, :sprint_date, :sprint_time)";
         
                         $stmt2 = $pdo->prepare($sql);
         
                         // Bind parameters to the query
-                        $fp1_time = substr($race->FirstPractice->time, 0, 8);
-                        $fp2_time = substr($race->SecondPractice->time, 0, 8);
-                        $fp3_time = substr($race->ThirdPractice->time, 0, 8);
+                        $fp1_time = (empty($race->FirstPractice->time)) ? null : substr($race->FirstPractice->time, 0, 8);
+                        $fp1_date = (empty($race->FirstPractice->date)) ? null : $race->FirstPractice->date;
+                        $fp2_time = (empty($race->SecondPractice->time)) ? null : substr($race->SecondPractice->time, 0, 8);
+                        $fp2_date = (empty($race->SecondPractice->date)) ? null : $race->SecondPractice->date;
+                        $fp3_time = (empty($race->ThirdPractice->time)) ? null : substr($race->ThirdPractice->time, 0, 8);
+                        $fp3_date = (empty($race->ThirdPractice->date)) ? null : $race->ThirdPractice->date;
                         $quali_time = substr($race->Qualifying->time, 0, 8);
                         $race_time = substr($race->time, 0, 8);
+                        $sprint_date = (empty($race->Sprint->date)) ? null : $race->Sprint->date;
+                        $sprint_time = (empty($race->Sprint->time)) ? null : substr($race->Sprint->time, 0, 8);
 
                         $stmt2->bindParam(':year', $race->season, PDO::PARAM_INT);
                         $stmt2->bindParam(':round', $race->round, PDO::PARAM_INT);
@@ -485,14 +493,17 @@
                         $stmt2->bindParam(':date', $race->date, PDO::PARAM_STR);
                         $stmt2->bindParam(':time', $race_time, PDO::PARAM_STR);
                         $stmt2->bindParam(':url', $race->url, PDO::PARAM_STR);
+
                         $stmt2->bindParam(':fp1_date', $race->FirstPractice->date, PDO::PARAM_STR);
                         $stmt2->bindParam(':fp1_time', $fp1_time, PDO::PARAM_STR);
-                        $stmt2->bindParam(':fp2_date', $race->SecondPractice->date, PDO::PARAM_STR);
+                        $stmt2->bindParam(':fp2_date', $fp2_date, PDO::PARAM_STR);
                         $stmt2->bindParam(':fp2_time', $fp2_time, PDO::PARAM_STR);
-                        $stmt2->bindParam(':fp3_date', $race->ThirdPractice->date, PDO::PARAM_STR);
+                        $stmt2->bindParam(':fp3_date', $fp3_date, PDO::PARAM_STR);
                         $stmt2->bindParam(':fp3_time', $fp3_time, PDO::PARAM_STR);
                         $stmt2->bindParam(':quali_date', $race->Qualifying->date, PDO::PARAM_STR);
                         $stmt2->bindParam(':quali_time', $quali_time, PDO::PARAM_STR);
+                        $stmt2->bindParam(':sprint_date', $sprint_date, PDO::PARAM_STR);
+                        $stmt2->bindParam(':sprint_time', $sprint_time, PDO::PARAM_STR);
         
                         // Execute the query
                         if ($stmt2->execute()) {
@@ -817,7 +828,7 @@
                                             (SELECT `driverId` FROM `drivers` WHERE `driverRef` = :driverId), 
                                             (SELECT `constructorId` FROM `constructors` WHERE `constructorRef` = :constructorId), 
                                             :number, :grid, :position, :positionText, :positionOrder, :points, :laps, :time, :milliseconds, :rank, :fastestLap, :fastestLapTime, :fastestLapSpeed,
-                                            (SELECT `statusId` FROM `status` WHERE `status` = :status))";
+                                            (SELECT COALESCE((SELECT `statusId` FROM `status` WHERE `status` = :status) ,0) as 'statusId' FROM dual))";
             
                             $stmt3 = $pdo->prepare($sql);
 
@@ -938,7 +949,7 @@
             echo 'Getting lap details'. $line_ending;
 
             // Prepare the SQL query
-            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year';
+            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year  AND `date` <= NOW()';
 
             // Prepare the statement
             $stmt = $pdo->prepare($sql);
@@ -1044,7 +1055,7 @@
             echo 'Getting pitstop details'. $line_ending;
 
             // Prepare the SQL query
-            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year';
+            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year AND `date` <= NOW()';
 
             // Prepare the statement
             $stmt = $pdo->prepare($sql);
@@ -1151,7 +1162,7 @@
             echo 'Getting constructor standing details'. $line_ending;
 
             // Prepare the SQL query
-            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year';
+            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year AND `date` <= NOW()';
 
             // Prepare the statement
             $stmt = $pdo->prepare($sql);
@@ -1248,7 +1259,7 @@
             echo 'Getting driver standing details'. $line_ending;
 
             // Prepare the SQL query
-            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year';
+            $sql = 'SELECT `round` FROM `races` WHERE `year` = :year AND `date` <= NOW()';
 
             // Prepare the statement
             $stmt = $pdo->prepare($sql);
