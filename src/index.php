@@ -439,6 +439,12 @@ if ($cmd == 'RACE' || $cmd == 'ALL') {
             // Cycle through the races and check if they are in the database already
             foreach ($dets->MRData->RaceTable->Races as $race) {
 
+                // handle cancelled races
+                if (!isset($race->round)) {
+                    echo ' - Race round unknown (' . $race->raceName . ') mising data so skipping' . $line_ending;
+                    continue;
+                }
+
                 if (!isset($race->FirstPractice->time)) {
                     echo ' - Race round ' . $race->round . ' (' . $race->raceName . ') missing data so skipping' . $line_ending;
                     continue;
